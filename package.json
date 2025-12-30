@@ -1,0 +1,43 @@
+{
+  "name": "git-code-diff-tool",
+  "version": "1.0.0",
+  "description": "可视化Git代码对比工具 - 对比两个仓库分支的代码差异",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "nodemon server/index.js",
+    "client:dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server/index.js"
+  },
+  "keywords": [
+    "git",
+    "diff",
+    "code-comparison",
+    "visualization"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "simple-git": "^3.21.0",
+    "diff": "^5.1.0",
+    "diff2html": "^3.4.47"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2",
+    "postcss": "^8.4.32",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-diff-view": "^3.2.0",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.8"
+  }
+}
