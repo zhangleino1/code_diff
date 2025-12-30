@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import BranchSelector from './components/BranchSelector';
 import FileList from './components/FileList';
 import DiffViewer from './components/DiffViewer';
@@ -19,11 +19,7 @@ function App() {
   const [filterText, setFilterText] = useState('');
 
   // 加载仓库信息
-  useEffect(() => {
-    loadRepoInfo();
-  }, []);
-
-  const loadRepoInfo = async () => {
+  const loadRepoInfo = useCallback(async () => {
     try {
       const pathData = await api.getRepoPath();
       setRepoPath(pathData.path);
@@ -38,16 +34,14 @@ function App() {
     } catch (err) {
       setError('加载仓库信息失败: ' + err.message);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadRepoInfo();
+  }, [loadRepoInfo]);
 
   // 当选择的分支改变时，加载变更的文件列表
-  useEffect(() => {
-    if (selectedBranch1 && selectedBranch2 && selectedBranch1 !== selectedBranch2) {
-      loadChangedFiles();
-    }
-  }, [selectedBranch1, selectedBranch2]);
-
-  const loadChangedFiles = async () => {
+  const loadChangedFiles = useCallback(async () => {
     setLoading(true);
     setError(null);
     setSelectedFile(null);
@@ -62,10 +56,16 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBranch1, selectedBranch2]);
+
+  useEffect(() => {
+    if (selectedBranch1 && selectedBranch2 && selectedBranch1 !== selectedBranch2) {
+      loadChangedFiles();
+    }
+  }, [selectedBranch1, selectedBranch2, loadChangedFiles]);
 
   // 选择文件查看差异
-  const handleFileSelect = async (file) => {
+  const handleFileSelect = useCallback(async (file) => {
     setSelectedFile(file);
     setLoading(true);
     setError(null);
@@ -79,18 +79,18 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBranch1, selectedBranch2]);
 
   // 刷新数据
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     loadRepoInfo();
     if (selectedBranch1 && selectedBranch2) {
       loadChangedFiles();
     }
-  };
+  }, [loadRepoInfo, loadChangedFiles, selectedBranch1, selectedBranch2]);
 
   // 设置仓库路径
-  const handleSetRepoPath = async (newPath) => {
+  const handleSetRepoPath = useCallback(async (newPath) => {
     try {
       setLoading(true);
       await api.setRepoPath(newPath);
@@ -102,11 +102,13 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadRepoInfo]);
 
   // 过滤文件
-  const filteredFiles = changedFiles.filter(file =>
-    file.file.toLowerCase().includes(filterText.toLowerCase())
+  const filteredFiles = useMemo(() =>
+    changedFiles.filter(file =>
+      file.file.toLowerCase().includes(filterText.toLowerCase())
+    ), [changedFiles, filterText]
   );
 
   return (
