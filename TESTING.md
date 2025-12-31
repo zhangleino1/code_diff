@@ -1,247 +1,212 @@
-# 测试指南
+# 测试与故障排查
 
-## 快速测试
+## 🚀 快速测试
 
-### 方法1: 使用启动脚本（推荐）
+### 启动应用
 
 ```bash
+# 方法1: 使用启动脚本（推荐）
 ./start.sh
-```
 
-这将自动检查依赖并启动前后端服务。
-
-### 方法2: 手动启动
-
-```bash
-# 安装依赖（首次运行）
-npm install
-
-# 启动服务
+# 方法2: 手动启动
+npm install  # 首次运行
 npm run dev
 ```
 
-## 测试当前仓库
+访问: http://localhost:3000
 
-由于这个工具本身就是一个Git仓库，您可以直接测试：
+---
 
-1. 访问 http://localhost:3000
-2. 工具会自动加载当前仓库（code_diff）
-3. 选择两个分支进行对比，例如：
-   - 基准分支: `claude/code-comparison-tool-D5rm8`
-   - 目标分支: 如果有其他分支的话
+## 📋 测试场景
 
-## 创建测试分支
+### 场景1: 测试当前仓库
 
-如果当前仓库只有一个分支，可以创建一个测试分支：
+1. 启动应用后自动加载当前仓库
+2. 选择两个分支进行对比
+3. 查看文件列表和代码差异
+4. 测试搜索功能
+5. 测试导出报告
 
-```bash
-# 创建并切换到新分支
-git checkout -b test-branch
+### 场景2: 对比两个独立仓库
 
-# 修改一些文件
-echo "# Test" >> test.txt
-echo "console.log('test');" >> src/test.js
-
-# 提交更改
-git add .
-git commit -m "test: 添加测试文件"
-
-# 切换回原分支
-git checkout claude/code-comparison-tool-D5rm8
-```
-
-现在您可以在工具中对比这两个分支了。
-
-## 测试两个不同的仓库
-
-### 场景: 对比公司仓库和客户仓库
-
-假设您有两个仓库：
-- `/path/to/company-repo`
-- `/path/to/customer-repo`
-
-#### 步骤1: 创建对比仓库
+**适用于**: 对比公司版本和客户定制版
 
 ```bash
-# 在合适的位置创建新目录
-mkdir ~/code-comparison
-cd ~/code-comparison
+# 1. 创建对比仓库
+mkdir ~/code-comparison && cd ~/code-comparison
 git init
 
-# 添加两个远程仓库
-git remote add company /path/to/company-repo
-git remote add customer /path/to/customer-repo
+# 2. 添加远程仓库
+git remote add company /path/to/company/repo
+git remote add customer /path/to/customer/repo
 
-# 拉取代码
-git fetch company
-git fetch customer
+# 3. 拉取代码
+git fetch company && git fetch customer
 
-# 创建本地分支
+# 4. 创建本地分支
 git checkout -b company-main company/main
 git checkout -b customer-main customer/main
 ```
 
-#### 步骤2: 在工具中使用
+然后在工具中：
+1. 切换仓库路径到 `~/code-comparison`
+2. 选择 `company-main` vs `customer-main`
+3. 查看差异并导出报告
 
-1. 启动工具
-2. 点击顶部的仓库路径编辑按钮
-3. 输入: `~/code-comparison` （或完整路径）
-4. 选择分支:
-   - 基准分支: `company-main`
-   - 目标分支: `customer-main`
-5. 查看所有差异
+### 场景3: 测试导出功能
 
-## 功能测试清单
+1. 选择两个分支
+2. 点击绿色"导出报告"按钮
+3. 验证下载的Markdown文件
+4. 在VS Code或Typora中打开查看
+5. 确认报告包含完整信息
 
-### 基础功能
-- [ ] 页面正常加载
-- [ ] 显示当前仓库路径
-- [ ] 显示分支列表
-- [ ] 选择两个不同的分支
+---
 
-### 文件列表
-- [ ] 显示变更的文件列表
-- [ ] 显示新增/删除/修改标记
-- [ ] 显示每个文件的新增和删除行数
-- [ ] 搜索框能过滤文件
+## 🐛 故障排查
 
-### 差异查看
-- [ ] 点击文件显示差异
-- [ ] 统一视图正常显示
-- [ ] 并排视图正常显示
-- [ ] 行号正确显示
-- [ ] 颜色标记正确（绿色=新增，红色=删除）
+### 问题1: 无法启动后端
 
-### 交互功能
-- [ ] 切换视图模式（统一/并排）
-- [ ] 刷新按钮工作正常
-- [ ] 更改仓库路径功能正常
-- [ ] 滚动流畅，无卡顿
+**症状**: 后端服务无法启动
 
-### 错误处理
-- [ ] 选择相同分支时显示提示
-- [ ] 无效仓库路径时显示错误
-- [ ] 网络错误时有友好提示
-
-## 性能测试
-
-### 大文件测试
-
-1. 选择包含大文件变更的分支
-2. 检查是否能流畅滚动
-3. 检查内存使用是否合理
-
-### 多文件测试
-
-1. 选择包含大量文件变更的分支
-2. 检查文件列表是否快速加载
-3. 检查搜索功能是否快速响应
-
-## 常见问题排查
-
-### 后端无法启动
-
+**解决方案**:
 ```bash
 # 检查端口是否被占用
 lsof -i :3001
 
-# 或者更改端口
-# 编辑 server/index.js，修改 PORT 常量
+# 或者修改端口（编辑 server/index.js）
 ```
 
-### 前端无法启动
+### 问题2: 无法启动前端
 
+**症状**: 前端服务无法启动
+
+**解决方案**:
 ```bash
-# 检查端口是否被占用
+# 检查端口
 lsof -i :3000
 
-# 或者更改端口
-# 编辑 vite.config.js，修改 server.port
+# 或修改端口（编辑 vite.config.js）
 ```
 
-### 无法获取分支列表
+### 问题3: 分支列表为空
 
-1. 确认当前目录是有效的Git仓库
-2. 运行 `git branch -a` 确认有分支
-3. 检查控制台错误信息
+**症状**: 界面上看不到任何分支
 
-### 差异显示不正确
+**解决方案**:
+1. 确认当前目录是Git仓库: `git status`
+2. 确认有分支: `git branch -a`
+3. 检查浏览器控制台错误
+4. 尝试刷新页面
 
-1. 刷新页面
-2. 重新选择分支
-3. 检查Git仓库状态: `git status`
-4. 查看浏览器控制台错误
+### 问题4: 导出按钮是灰色的
 
-## 自动化测试（未来）
+**症状**: 无法点击导出按钮
 
-当前版本暂未包含自动化测试。如需添加测试：
+**原因**:
+- 未选择两个分支
+- 两个分支相同
 
-```bash
-# 安装测试依赖
-npm install -D vitest @testing-library/react @testing-library/jest-dom
+**解决方案**:
+1. 确保选择了两个不同的分支
+2. 等待文件列表加载完成
 
-# 添加测试脚本到 package.json
-"scripts": {
-  "test": "vitest",
-  "test:ui": "vitest --ui"
-}
-```
+### 问题5: 导出的报告是空的
 
-## 报告问题
+**症状**: 下载的Markdown文件没有内容
 
-如果发现bug或有改进建议：
+**原因**: 两个分支没有差异
 
-1. 记录重现步骤
-2. 截图或录屏
-3. 查看浏览器控制台错误
-4. 查看后端日志
-5. 提交Issue
+**解决方案**:
+1. 确认选择了正确的分支
+2. 使用 `git log branch1..branch2` 确认有差异
 
-## 预期输出示例
+### 问题6: 中文显示乱码
 
-### 成功启动后端
-```
-🚀 Git代码对比工具服务器运行在 http://localhost:3001
-📁 当前仓库路径: /home/user/code_diff
-```
+**症状**: 导出的报告中文乱码
 
-### 成功启动前端
-```
-  VITE v5.4.21  ready in 234 ms
+**解决方案**:
+- 使用支持UTF-8的编辑器打开
+- 推荐: VS Code, Typora, Obsidian
 
-  ➜  Local:   http://localhost:3000/
-  ➜  Network: use --host to expose
-  ➜  press h + enter to show help
-```
+---
 
-### 正常的API响应
+## ✅ 功能检查清单
 
-**GET /api/branches**
-```json
-{
-  "current": "claude/code-comparison-tool-D5rm8",
-  "all": ["claude/code-comparison-tool-D5rm8", "main"],
-  "branches": { ... }
-}
-```
+使用此清单验证所有功能正常：
 
-**POST /api/changed-files**
-```json
-{
-  "files": [
-    {
-      "file": "src/App.jsx",
-      "changes": 10,
-      "insertions": 8,
-      "deletions": 2,
-      "binary": false
-    }
-  ],
-  "total": {
-    "files": 1,
-    "insertions": 8,
-    "deletions": 2,
-    "changes": 10
-  }
-}
-```
+**基础功能**:
+- [ ] 应用正常启动
+- [ ] 显示仓库路径
+- [ ] 显示分支列表
+- [ ] 可以选择分支
+
+**文件对比**:
+- [ ] 显示变更文件列表
+- [ ] 文件列表显示新增/删除/修改标记
+- [ ] 搜索功能正常
+- [ ] 点击文件显示差异
+
+**视图切换**:
+- [ ] 统一视图正常
+- [ ] 并排视图正常
+- [ ] 行号正确
+- [ ] 颜色标记正确（绿色新增/红色删除）
+
+**导出功能** ⭐:
+- [ ] 导出按钮可用
+- [ ] 报告成功下载
+- [ ] 报告内容完整
+- [ ] 报告格式正确
+
+---
+
+## 🔍 性能检查
+
+### 大文件测试
+- 选择包含大文件变更的分支
+- 验证滚动流畅
+- 检查内存使用
+
+### 多文件测试
+- 选择包含大量文件变更的分支
+- 验证文件列表快速加载
+- 验证搜索响应及时
+
+---
+
+## 📞 获取帮助
+
+如果遇到问题：
+
+1. **查看文档**:
+   - [README.md](README.md) - 完整功能文档
+   - [QUICKSTART.md](QUICKSTART.md) - 快速开始
+   - [EXPORT_GUIDE.md](EXPORT_GUIDE.md) - 导出指南
+
+2. **检查日志**:
+   - 浏览器控制台（F12）
+   - 后端终端输出
+
+3. **验证环境**:
+   ```bash
+   ./health-check.sh
+   ```
+
+4. **提交Issue**:
+   - 提供详细的重现步骤
+   - 附上错误截图
+   - 包含浏览器和Node版本
+
+---
+
+## 🎯 测试最佳实践
+
+1. **首次使用**: 先用当前仓库测试，熟悉界面
+2. **测试导出**: 导出一个小型对比报告验证功能
+3. **实际使用**: 再对比真实的项目仓库
+4. **定期更新**: 保持依赖包最新
+
+---
+
+**提示**: 运行 `./health-check.sh` 可以快速验证所有环境配置！
