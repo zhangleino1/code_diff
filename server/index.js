@@ -184,6 +184,55 @@ app.post('/api/log', async (req, res) => {
   }
 });
 
+// 生成对比报告的Markdown内容
+app.post('/api/export-report', async (req, res) => {
+  try {
+    const { branch1, branch2 } = req.body;
+
+    if (!branch1 || !branch2) {
+      return res.status(400).json({ error: '请提供两个分支名称' });
+    }
+
+    const git = simpleGit(repoPath);
+
+    // 获取文件变更统计
+    const diffSummary = await git.diffSummary([`${branch1}...${branch2}`]);
+
+    // 获取完整的diff
+    const fullDiff = await git.diff([`${branch1}...${branch2}`, '--unified=5', '--no-color']);
+
+    // 获取分支信息
+    const branch1Info = await git.log([branch1, '-1']);
+    const branch2Info = await git.log([branch2, '-1']);
+
+    // 生成Markdown报告
+    const reportData = {
+      branch1,
+      branch2,
+      branch1LatestCommit: branch1Info.latest,
+      branch2LatestCommit: branch2Info.latest,
+      summary: {
+        totalFiles: diffSummary.files.length,
+        insertions: diffSummary.insertions,
+        deletions: diffSummary.deletions,
+        changes: diffSummary.changed
+      },
+      files: diffSummary.files.map(file => ({
+        file: file.file,
+        changes: file.changes,
+        insertions: file.insertions,
+        deletions: file.deletions,
+        binary: file.binary
+      })),
+      fullDiff
+    };
+
+    res.json(reportData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Git代码对比工具服务器运行在 http://localhost:${PORT}`);
   console.log(`📁 当前仓库路径: ${repoPath}`);

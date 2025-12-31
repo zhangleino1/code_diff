@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function Header({ repoPath, onSetRepoPath, onRefresh }) {
+function Header({ repoPath, onSetRepoPath, onRefresh, onExportMarkdown, canExport }) {
   const [showPathInput, setShowPathInput] = useState(false);
   const [inputPath, setInputPath] = useState('');
 
@@ -47,6 +47,23 @@ function Header({ repoPath, onSetRepoPath, onRefresh }) {
               </svg>
             </button>
           </div>
+
+          {/* 导出按钮 */}
+          <button
+            onClick={onExportMarkdown}
+            disabled={!canExport}
+            className={`px-4 py-2 rounded border transition-colors flex items-center gap-2 ${
+              canExport
+                ? 'bg-green-600 hover:bg-green-700 border-green-600 text-white cursor-pointer'
+                : 'bg-vscode-panel border-vscode-border text-vscode-text-dim cursor-not-allowed opacity-50'
+            }`}
+            title={canExport ? '导出对比报告为Markdown' : '请先选择两个分支'}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="text-sm font-medium">导出报告</span>
+          </button>
 
           {/* 刷新按钮 */}
           <button

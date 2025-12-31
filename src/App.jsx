@@ -4,6 +4,7 @@ import FileList from './components/FileList';
 import DiffViewer from './components/DiffViewer';
 import Header from './components/Header';
 import { api } from './utils/api';
+import { generateMarkdownReport, downloadMarkdown } from './utils/markdownExporter';
 import './styles/index.css';
 
 function App() {
@@ -104,6 +105,41 @@ function App() {
     }
   }, [loadRepoInfo]);
 
+  // 导出Markdown报告
+  const handleExportMarkdown = useCallback(async () => {
+    if (!selectedBranch1 || !selectedBranch2) {
+      setError('请先选择两个分支');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const reportData = await api.exportReport(selectedBranch1, selectedBranch2);
+
+      if (reportData.error) {
+        setError('导出失败: ' + reportData.error);
+        return;
+      }
+
+      // 生成Markdown内容
+      const markdown = generateMarkdownReport(reportData, repoPath);
+
+      // 生成文件名
+      const filename = `代码对比报告_${selectedBranch1}_vs_${selectedBranch2}_${new Date().toISOString().split('T')[0]}.md`;
+
+      // 下载文件
+      downloadMarkdown(markdown, filename);
+
+      // 显示成功提示
+      setError(null);
+      alert('✅ 报告已导出成功！');
+    } catch (err) {
+      setError('导出失败: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedBranch1, selectedBranch2, repoPath]);
+
   // 过滤文件
   const filteredFiles = useMemo(() =>
     changedFiles.filter(file =>
@@ -117,6 +153,8 @@ function App() {
         repoPath={repoPath}
         onSetRepoPath={handleSetRepoPath}
         onRefresh={handleRefresh}
+        onExportMarkdown={handleExportMarkdown}
+        canExport={!!(selectedBranch1 && selectedBranch2 && selectedBranch1 !== selectedBranch2)}
       />
 
       <div className="flex-1 flex flex-col p-4 gap-4">

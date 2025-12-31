@@ -71,5 +71,15 @@ export const api = {
       body: JSON.stringify({ branch, maxCount })
     });
     return response.json();
+  },
+
+  // 导出对比报告
+  async exportReport(branch1, branch2) {
+    const response = await fetch(`${API_BASE}/export-report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branch1, branch2 })
+    });
+    return response.json();
   }
 };
